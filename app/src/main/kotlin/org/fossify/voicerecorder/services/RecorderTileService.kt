@@ -9,7 +9,6 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import androidx.core.content.ContextCompat
 import org.fossify.voicerecorder.R
 import org.fossify.voicerecorder.activities.BackgroundRecordActivity
 
@@ -36,18 +35,10 @@ class RecorderTileService : TileService() {
         super.onClick()
         if (RecorderService.isRunning) {
             stopService(Intent(this, RecorderService::class.java))
+            updateTile()
         } else {
-            startRecording()
-        }
-        updateTile()
-    }
-
-    private fun startRecording() {
-        try {
-            ContextCompat.startForegroundService(this, Intent(this, RecorderService::class.java))
-        } catch (@Suppress("TooGenericExceptionCaught") ignored: Exception) {
-            // The system refused to start the service in the background, so go through the
-            // activity that handles the notification permission and starts the recording.
+            // The microphone is only available to apps in the foreground, so the recording is
+            // started from an activity instead of starting the service directly from the tile.
             openRecordActivity()
         }
     }
@@ -74,7 +65,7 @@ class RecorderTileService : TileService() {
         val tile = qsTile ?: return
         tile.state = if (RecorderService.isRunning) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         tile.icon = Icon.createWithResource(this, org.fossify.commons.R.drawable.ic_microphone_vector)
-        tile.label = getString(R.string.recorder)
+        tile.label = getString(R.string.app_launcher_name)
         tile.updateTile()
     }
 }

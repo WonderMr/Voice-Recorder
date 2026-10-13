@@ -61,6 +61,7 @@
         <activity
             android:name="org.fossify.voicerecorder.activities.BackgroundRecordActivity"
             android:exported="false"
+            android:showWhenLocked="true"
             android:theme="@style/AppTheme.NoDisplay" />
 
         <activity
@@ -121,7 +122,7 @@
             android:name=".services.RecorderTileService"
             android:exported="true"
             android:icon="@drawable/ic_microphone_vector"
-            android:label="@string/recorder"
+            android:label="@string/app_launcher_name"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
