@@ -33,6 +33,7 @@ import org.fossify.voicerecorder.helpers.IS_RECORDING
 import org.fossify.voicerecorder.helpers.MyWidgetRecordDisplayProvider
 import org.fossify.voicerecorder.helpers.TOGGLE_WIDGET_UI
 import org.fossify.voicerecorder.models.Recording
+import org.fossify.voicerecorder.services.RecorderTileService
 import java.io.File
 import java.util.Calendar
 import java.util.Locale
@@ -53,6 +54,7 @@ fun Context.drawableToBitmap(drawable: Drawable): Bitmap {
 }
 
 fun Context.updateWidgets(isRecording: Boolean) {
+    RecorderTileService.requestUpdate(applicationContext)
     val widgetIDs = AppWidgetManager.getInstance(applicationContext)
         ?.getAppWidgetIds(
             ComponentName(
