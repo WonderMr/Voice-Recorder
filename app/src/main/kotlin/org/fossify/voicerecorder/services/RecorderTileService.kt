@@ -18,8 +18,12 @@ import org.fossify.voicerecorder.activities.BackgroundRecordActivity
  */
 class RecorderTileService : TileService() {
     companion object {
+        private var listeningInstance: RecorderTileService? = null
+
         fun requestUpdate(context: Context) {
-            requestListeningState(
+            // requestListeningState does nothing while the tile is already listening,
+            // so a tile that is currently visible has to be updated directly.
+            listeningInstance?.updateTile() ?: requestListeningState(
                 context,
                 ComponentName(context, RecorderTileService::class.java)
             )
@@ -28,14 +32,23 @@ class RecorderTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
+        listeningInstance = this
         updateTile()
+    }
+
+    override fun onStopListening() {
+        super.onStopListening()
+        if (listeningInstance == this) {
+            listeningInstance = null
+        }
     }
 
     override fun onClick() {
         super.onClick()
         if (RecorderService.isRunning) {
             stopService(Intent(this, RecorderService::class.java))
-            updateTile()
+            // The service is destroyed asynchronously, so don't wait for it to update the tile.
+            updateTile(isRecording = false)
         } else {
             // The microphone is only available to apps in the foreground, so the recording is
             // started from an activity instead of starting the service directly from the tile.
@@ -61,9 +74,9 @@ class RecorderTileService : TileService() {
         }
     }
 
-    private fun updateTile() {
+    private fun updateTile(isRecording: Boolean = RecorderService.isRunning) {
         val tile = qsTile ?: return
-        tile.state = if (RecorderService.isRunning) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        tile.state = if (isRecording) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         tile.icon = Icon.createWithResource(this, org.fossify.commons.R.drawable.ic_microphone_vector)
         tile.label = getString(R.string.app_launcher_name)
         tile.updateTile()
